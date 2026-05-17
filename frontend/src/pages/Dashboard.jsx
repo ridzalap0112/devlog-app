@@ -29,108 +29,80 @@ export default function Dashboard() {
 
   useEffect(() => { fetchLogs(); }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
+  const handleLogout = () => { logout(); navigate('/login'); };
   const handleDelete = async (id) => {
     if (!confirm('Delete this log?')) return;
     await logsAPI.delete(id);
     setLogs(logs.filter(l => l.id !== id));
   };
+  const handleEdit = (log) => { setEditingLog(log); setShowForm(true); };
+  const handleFormClose = () => { setShowForm(false); setEditingLog(null); fetchLogs(); };
 
-  const handleEdit = (log) => {
-    setEditingLog(log);
-    setShowForm(true);
-  };
-
-  const handleFormClose = () => {
-    setShowForm(false);
-    setEditingLog(null);
-    fetchLogs();
-  };
-
-  const filteredLogs = moodFilter === 'all'
-    ? logs
-    : logs.filter(l => l.mood === moodFilter);
-
-  // Stats
+  const filteredLogs = moodFilter === 'all' ? logs : logs.filter(l => l.mood === moodFilter);
   const totalMinutes = logs.reduce((sum, l) => sum + (l.study_minutes || 0), 0);
   const totalHours = Math.floor(totalMinutes / 60);
-  const moodCounts = logs.reduce((acc, l) => {
-    acc[l.mood] = (acc[l.mood] || 0) + 1;
-    return acc;
-  }, {});
+  const moodCounts = logs.reduce((acc, l) => { acc[l.mood] = (acc[l.mood] || 0) + 1; return acc; }, {});
+  const thisWeek = logs.filter(l => {
+    const diff = (new Date() - new Date(l.created_at)) / (1000*60*60*24);
+    return diff <= 7;
+  }).length;
+
+  const stats = [
+    { label: 'Total Logs',    value: logs.length,              accent: '#3d3df7' },
+    { label: 'Hours Studied', value: `${totalHours}h`,         accent: '#0d9488' },
+    { label: 'Great Days',    value: moodCounts['great'] || 0, accent: '#ea580c' },
+    { label: 'This Week',     value: thisWeek,                 accent: '#7c3aed' },
+  ];
 
   return (
-    <div className="min-h-screen">
+    <div className="page">
       {/* Navbar */}
-      <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
-              <span className="text-lg">📓</span>
+      <nav className="navbar">
+        <div className="navbar-inner">
+          <div className="navbar-brand">
+            <div className="navbar-logo">
+              <div className="navbar-logo-mark" />
             </div>
-            <span className="font-bold text-white text-lg">DevLog</span>
+            <span className="navbar-title">DevLog</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-slate-400 text-sm hidden sm:block">
-              Hey, <span className="text-white font-medium">{user?.name}</span> 👋
+          <div style={{ display:'flex', alignItems:'center', gap:'0.75rem' }}>
+            <span style={{ color:'#64748b', fontSize:'0.875rem' }}>
+              {user?.name}
             </span>
-            <button onClick={handleLogout} className="btn-secondary text-sm py-2 px-4">
+            <button onClick={handleLogout} className="btn-secondary" style={{ padding:'0.4rem 1rem' }}>
               Sign out
             </button>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
-
+      <div className="container">
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 animate-slide-up">
-          {[
-            { label: 'Total Logs', value: logs.length, icon: '📝' },
-            { label: 'Hours Studied', value: `${totalHours}h`, icon: '⏱️' },
-            { label: 'Great Days', value: moodCounts['great'] || 0, icon: '🔥' },
-            { label: 'This Week', value: logs.filter(l => {
-              const d = new Date(l.created_at);
-              const now = new Date();
-              const diff = (now - d) / (1000 * 60 * 60 * 24);
-              return diff <= 7;
-            }).length, icon: '📅' },
-          ].map(({ label, value, icon }) => (
-            <div key={label} className="card text-center">
-              <div className="text-2xl mb-1">{icon}</div>
-              <div className="text-2xl font-bold text-white">{value}</div>
-              <div className="text-xs text-slate-400 mt-0.5">{label}</div>
+        <div className="stats-grid animate-slide-up">
+          {stats.map(({ label, value, accent }) => (
+            <div key={label} className="stat-card">
+              <div className="stat-icon" style={{ backgroundColor: accent + '20', color: accent }}>
+                {label.slice(0,2).toUpperCase()}
+              </div>
+              <div className="stat-value">{value}</div>
+              <div className="stat-label">{label}</div>
             </div>
           ))}
         </div>
 
-        {/* Header + New Log button */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">My Learning Logs</h2>
-          <button
-            onClick={() => { setEditingLog(null); setShowForm(true); }}
-            className="btn-primary text-sm"
-          >
+        {/* Header */}
+        <div className="section-header">
+          <h2 className="section-title">My Learning Logs</h2>
+          <button onClick={() => { setEditingLog(null); setShowForm(true); }} className="btn-primary">
             + New Log
           </button>
         </div>
 
-        {/* Mood Filter */}
-        <div className="flex gap-2 mb-6 flex-wrap">
+        {/* Filters */}
+        <div className="filter-row">
           {MOOD_FILTER.map(mood => (
-            <button
-              key={mood}
-              onClick={() => setMoodFilter(mood)}
-              className={`px-4 py-1.5 rounded-xl text-sm font-medium capitalize transition-all
-                ${moodFilter === mood
-                  ? 'bg-brand-600 text-white'
-                  : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-            >
+            <button key={mood} onClick={() => setMoodFilter(mood)}
+              className={`filter-tab ${moodFilter === mood ? 'active' : ''}`}>
               {mood}
             </button>
           ))}
@@ -138,40 +110,37 @@ export default function Dashboard() {
 
         {/* Logs */}
         {loading ? (
-          <div className="text-center py-20 text-slate-400">Loading your logs...</div>
+          <div style={{ textAlign:'center', padding:'5rem 0', color:'#64748b' }}>
+            <div className="spinner animate-spin" />
+            <p>Loading your logs...</p>
+          </div>
         ) : filteredLogs.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-5xl mb-4">📭</div>
-            <p className="text-slate-400 text-lg">No logs yet.</p>
-            <p className="text-slate-500 text-sm mt-1">Start documenting your learning journey!</p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="btn-primary mt-6"
-            >
+          <div className="empty-state">
+            <div className="empty-icon">
+              <div className="empty-icon-lines">
+                <div className="empty-icon-line" />
+                <div className="empty-icon-line" />
+                <div className="empty-icon-line" />
+              </div>
+            </div>
+            <p className="empty-title">No logs yet</p>
+            <p className="empty-sub">Start documenting your learning journey</p>
+            <button onClick={() => setShowForm(true)} className="btn-primary" style={{ marginTop:'1.5rem' }}>
               Write your first log
             </button>
           </div>
         ) : (
-          <div className="grid gap-4 animate-slide-up">
+          <div className="log-list animate-slide-up">
             {filteredLogs.map(log => (
-              <LogCard
-                key={log.id}
-                log={log}
+              <LogCard key={log.id} log={log}
                 onEdit={() => handleEdit(log)}
-                onDelete={() => handleDelete(log.id)}
-              />
+                onDelete={() => handleDelete(log.id)} />
             ))}
           </div>
         )}
       </div>
 
-      {/* Form Modal */}
-      {showForm && (
-        <LogForm
-          log={editingLog}
-          onClose={handleFormClose}
-        />
-      )}
+      {showForm && <LogForm log={editingLog} onClose={handleFormClose} />}
     </div>
   );
 }

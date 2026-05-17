@@ -24,71 +24,43 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md animate-fade-in">
-
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-600 rounded-2xl mb-4 shadow-lg shadow-brand-600/30">
-            <span className="text-2xl">📓</span>
+    <div className="auth-container animate-fade-in">
+      <div className="auth-box">
+        <div className="auth-logo">
+          <div className="auth-logo-mark">
+            <div className="auth-logo-inner" />
           </div>
-          <h1 className="text-3xl font-bold text-white">DevLog</h1>
-          <p className="text-slate-400 mt-1">Your learning journey starts here</p>
+          <h1 className="auth-title">DevLog</h1>
+          <p className="auth-subtitle">Your learning journey starts here</p>
         </div>
 
-        {/* Card */}
         <div className="card">
-          <h2 className="text-xl font-bold text-white mb-6">Welcome back</h2>
+          <h2 style={{ fontSize:'1.25rem', fontWeight:700, color:'#f1f5f9', marginBottom:'1.5rem' }}>
+            Welcome back
+          </h2>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-4 text-sm">
-              {error}
+          {error && <div className="alert-error" style={{ marginBottom:'1rem' }}>{error}</div>}
+
+          <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input type="email" placeholder="you@example.com" className="input-field"
+                value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                className="input-field"
-                value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
-                required
-              />
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input type="password" placeholder="Enter your password" className="input-field"
+                value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="input-field"
-                value={form.password}
-                onChange={e => setForm({ ...form, password: e.target.value })}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn-primary w-full mt-2"
-              disabled={loading}
-            >
+            <button type="submit" className="btn-primary w-full"
+              style={{ marginTop:'0.5rem' }} disabled={loading}>
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
-          <p className="text-center text-slate-400 text-sm mt-6">
+          <p style={{ textAlign:'center', color:'#64748b', fontSize:'0.875rem', marginTop:'1.5rem' }}>
             Don't have an account?{' '}
-            <Link to="/register" className="text-brand-400 hover:text-brand-300 font-medium">
-              Create one
-            </Link>
+            <Link to="/register" className="link">Create one</Link>
           </p>
         </div>
       </div>

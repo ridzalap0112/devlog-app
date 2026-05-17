@@ -1,8 +1,8 @@
 const MOOD_CONFIG = {
-  great: { emoji: '🔥', label: 'Great', color: 'text-orange-400 bg-orange-400/10 border-orange-400/20' },
-  good:  { emoji: '😊', label: 'Good',  color: 'text-green-400 bg-green-400/10 border-green-400/20' },
-  okay:  { emoji: '😐', label: 'Okay',  color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' },
-  bad:   { emoji: '😔', label: 'Bad',   color: 'text-red-400 bg-red-400/10 border-red-400/20' },
+  great: { label: 'Great', color: '#ea580c', bg: 'rgba(234,88,12,0.1)', border: 'rgba(234,88,12,0.2)' },
+  good:  { label: 'Good',  color: '#16a34a', bg: 'rgba(22,163,74,0.1)',  border: 'rgba(22,163,74,0.2)' },
+  okay:  { label: 'Okay',  color: '#ca8a04', bg: 'rgba(202,138,4,0.1)',  border: 'rgba(202,138,4,0.2)' },
+  bad:   { label: 'Bad',   color: '#dc2626', bg: 'rgba(220,38,38,0.1)',  border: 'rgba(220,38,38,0.2)' },
 };
 
 export default function LogCard({ log, onEdit, onDelete }) {
@@ -11,64 +11,55 @@ export default function LogCard({ log, onEdit, onDelete }) {
     weekday: 'short', month: 'short', day: 'numeric'
   });
   const hours = Math.floor((log.study_minutes || 0) / 60);
-  const mins = (log.study_minutes || 0) % 60;
+  const mins  = (log.study_minutes || 0) % 60;
   const duration = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
 
   return (
-    <div className="card group hover:border-brand-800/50 animate-fade-in">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
+    <div className="log-card">
+      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'1rem' }}>
+        <div style={{ flex:1, minWidth:0 }}>
+
           {/* Title + mood */}
-          <div className="flex items-center gap-3 mb-2 flex-wrap">
-            <h3 className="font-semibold text-white text-lg leading-snug">
+          <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', marginBottom:'0.5rem', flexWrap:'wrap' }}>
+            <h3 style={{ fontWeight:600, color:'#f1f5f9', fontSize:'1rem', lineHeight:1.4 }}>
               {log.title}
             </h3>
-            <span className={`mood-badge border ${mood.color}`}>
-              {mood.emoji} {mood.label}
+            <span className="mood-badge" style={{
+              color: mood.color, backgroundColor: mood.bg, borderColor: mood.border
+            }}>
+              {mood.label}
             </span>
           </div>
 
-          {/* Content preview */}
+          {/* Content */}
           {log.content && (
-            <p className="text-slate-400 text-sm leading-relaxed mb-3 line-clamp-2">
+            <p style={{ color:'#64748b', fontSize:'0.875rem', lineHeight:1.6,
+                        marginBottom:'0.75rem', overflow:'hidden',
+                        display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>
               {log.content}
             </p>
           )}
 
           {/* Tags */}
           {log.tags && log.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
+            <div style={{ display:'flex', flexWrap:'wrap', gap:'0.375rem', marginBottom:'0.75rem' }}>
               {log.tags.map(tag => (
                 <span key={tag} className="tag-badge">{tag}</span>
               ))}
             </div>
           )}
 
-          {/* Meta info */}
-          <div className="flex items-center gap-4 text-xs text-slate-500">
-            <span>📅 {date}</span>
-            <span>⏱ {duration} studied</span>
+          {/* Meta */}
+          <div className="meta-info">
+            <span>{date}</span>
+            <span>{duration} studied</span>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-          <button
-            onClick={onEdit}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400
-                       hover:text-white transition-all"
-            title="Edit"
-          >
-            ✏️
-          </button>
-          <button
-            onClick={onDelete}
-            className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400
-                       transition-all"
-            title="Delete"
-          >
-            🗑️
-          </button>
+        <div className="log-card-actions">
+          <button className="action-btn edit" onClick={onEdit} title="Edit">ED</button>
+          <button className="action-btn delete" onClick={onDelete} title="Delete">RM</button>
         </div>
       </div>
     </div>
