@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { logsAPI } from '../services/api';
 import LogCard from '../components/LogCard';
 import LogForm from '../components/LogForm';
+import StreakCard from '../components/StreakCard';
+import WeeklyChart from '../components/WeeklyChart';
 
 const MOOD_FILTER = ['all', 'great', 'good', 'okay', 'bad'];
 
@@ -66,9 +68,7 @@ export default function Dashboard() {
             <span className="navbar-title">DevLog</span>
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:'0.75rem' }}>
-            <span style={{ color:'#64748b', fontSize:'0.875rem' }}>
-              {user?.name}
-            </span>
+            <span style={{ color:'#64748b', fontSize:'0.875rem' }}>{user?.name}</span>
             <button onClick={handleLogout} className="btn-secondary" style={{ padding:'0.4rem 1rem' }}>
               Sign out
             </button>
@@ -89,6 +89,14 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+
+        {/* Streak + Chart — hanya tampil kalau ada logs */}
+        {!loading && logs.length > 0 && (
+          <div className="animate-slide-up">
+            <StreakCard logs={logs} />
+            <WeeklyChart logs={logs} />
+          </div>
+        )}
 
         {/* Header */}
         <div className="section-header">
@@ -125,7 +133,8 @@ export default function Dashboard() {
             </div>
             <p className="empty-title">No logs yet</p>
             <p className="empty-sub">Start documenting your learning journey</p>
-            <button onClick={() => setShowForm(true)} className="btn-primary" style={{ marginTop:'1.5rem' }}>
+            <button onClick={() => setShowForm(true)} className="btn-primary"
+              style={{ marginTop:'1.5rem' }}>
               Write your first log
             </button>
           </div>
